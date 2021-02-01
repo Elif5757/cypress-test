@@ -127,7 +127,8 @@
           "options": {
             "cypressConfig": "apps/app-e2e/cypress.json",
             "tsConfig": "apps/app-e2e/tsconfig.e2e.json",
-            "devServerTarget": "app:serve"
+            "devServerTarget": "app:serve",
+            "headless": true
           },
           "configurations": {
             "production": {
