@@ -10,7 +10,8 @@ First, i have installed the cypress-cucumber-preprocessor with npm i cypress-cuc
 Next, I have written an alternative preprocessTypescript() function by modifying the src/plugins/index.js file like so:
 
 
-`const wp = require('@cypress/webpack-preprocessor');
+`
+const wp = require('@cypress/webpack-preprocessor');
 const { getWebpackConfig } = require('@nrwl/cypress/plugins/preprocessor');
 
 function preprocessTypescript(config) {
@@ -95,10 +96,13 @@ when i add in options  `headless:true`  like :
             "tsConfig": "apps/app-e2e/tsconfig.e2e.json",
             "devServerTarget": "app:serve",
             "headless": true
-          },`
+          },
+          
+`
 
 
 I get the following error message : 
+
 `
 Starting type checking service...
 Using 1 worker with 2048MB memory limit
