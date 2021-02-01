@@ -6,7 +6,7 @@
 I have created this repository with (npx create-nx-workspace --preset=angular) to simulate a bug -> https://github.com/nrwl/nx/issues/4590
 
 
-First, i have installed the cypress-cucumber-preprocessor with npm i cypress-cucumber-preprocessor 
+First, i have installed the cypress-cucumber-preprocessor with npm i cypress-cucumber-preprocessor. 
 Next, I have written an alternative preprocessTypescript() function by modifying the src/plugins/index.js file like so:
 
 
