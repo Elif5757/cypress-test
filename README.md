@@ -1,5 +1,4 @@
 
-
 # CypressTest
 
 
@@ -11,6 +10,7 @@ Next, I have written an alternative preprocessTypescript() function by modifying
 
 
 `
+
 const wp = require('@cypress/webpack-preprocessor');
 const { getWebpackConfig } = require('@nrwl/cypress/plugins/preprocessor');
 
@@ -42,11 +42,12 @@ function preprocessTypescript(config) {
 }
 
 module.exports = (on, config) => {
-// `on` is used to hook into various events Cypress emits
-// `config` is the resolved Cypress config
-  on('file:preprocessor', wp);
-// Preprocess Typescript file using Nx helper
-on('file:preprocessor', preprocessTypescript(config));};
+
+on('file:preprocessor', wp);
+
+on('file:preprocessor', preprocessTypescript(config));      // Preprocess Typescript file using Nx helper
+
+};
 `
 
 
@@ -70,6 +71,7 @@ Run `ng e2e` to execute the end-to-end tests.
 
 
 my test will be passed successfully. I have no errors with the configuration in the angular.json: 
+
 `
   "app-e2e": {
       "root": "apps\\app-e2e",
