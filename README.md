@@ -2,104 +2,125 @@
 
 # CypressTest
 
-This project was generated using [Nx](https://nx.dev).
 
-<p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
+I have created this repository with (npx create-nx-workspace --preset=angular) to simulate a bug -> https://github.com/nrwl/nx/issues/4590
 
-🔎 **Nx is a set of Extensible Dev Tools for Monorepos.**
 
-## Quick Start & Documentation
+First, i have installed the cypress-cucumber-preprocessor with npm i cypress-cucumber-preprocessor 
+Next, I have written an alternative preprocessTypescript() function by modifying the src/plugins/index.js file like so:
 
-[Nx Documentation](https://nx.dev/angular)
 
-[10-minute video showing all Nx features](https://nx.dev/angular/getting-started/what-is-nx)
+`const wp = require('@cypress/webpack-preprocessor');
+const { getWebpackConfig } = require('@nrwl/cypress/plugins/preprocessor');
 
-[Interactive Tutorial](https://nx.dev/angular/tutorial/01-create-application)
+function preprocessTypescript(config) {
+  if (!config.env.tsConfig) {
+    throw new Error(
+      'Please provide an absolute path to a tsconfig.json as cypressConfig.env.tsConfig'
+    );
+  }
 
-## Adding capabilities to your workspace
+  const webpackConfig = getWebpackConfig(config);
 
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
+  webpackConfig.node = { fs: 'empty', child_process: 'empty', readline: 'empty' };
+  webpackConfig.module.rules.push({
+    test: /\.feature$/,
+    use: [{
+      loader: 'cypress-cucumber-preprocessor/loader'
+    }]
+  }, {
+    test: /\.features$/,
+    use: [{
+      loader: 'cypress-cucumber-preprocessor/lib/featuresLoader'
+    }]
+  });
 
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
+  return async (...args) => wp({
+    webpackOptions: webpackConfig
+  })(...args);
+}
 
-Below are our core plugins:
+module.exports = (on, config) => {
+// `on` is used to hook into various events Cypress emits
+// `config` is the resolved Cypress config
+  on('file:preprocessor', wp);
+// Preprocess Typescript file using Nx helper
+on('file:preprocessor', preprocessTypescript(config));};
+`
 
-- [Angular](https://angular.io)
-  - `ng add @nrwl/angular`
-- [React](https://reactjs.org)
-  - `ng add @nrwl/react`
-- Web (no framework frontends)
-  - `ng add @nrwl/web`
-- [Nest](https://nestjs.com)
-  - `ng add @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `ng add @nrwl/express`
-- [Node](https://nodejs.org)
-  - `ng add @nrwl/node`
 
-There are also many [community plugins](https://nx.dev/nx-community) you could add.
+Finally, I have added a .cypress-cucumber-preprocessorrc file to the app-e2e folder with this configuration:
 
-## Generate an application
+`{
+"stepDefinitions": "src/support/step_definitions"
+}`
 
-Run `ng g @nrwl/angular:app my-app` to generate an application.
 
-> You can use any of the plugins above to generate applications as well.
+in the package.json i have set "nonGlobalStepDefinitions": true
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
 
-## Generate a library
+As an example I have created a feature file that visits the nx page and the implementation is in the support/step_definitions folder. 
 
-Run `ng g @nrwl/angular:lib my-lib` to generate a library.
 
-> You can also use any of the plugins above to generate libraries as well.
-
-Libraries are shareable across libraries and applications. They can be imported from `@cypress-test/mylib`.
-
-## Development server
-
-Run `ng serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng g component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `ng build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
 
 ## Running end-to-end tests
 
-Run `ng e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx dep-graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev/angular) to learn more.
+Run `ng e2e` to execute the end-to-end tests. 
 
 
+my test will be passed successfully. I have no errors with the configuration in the angular.json: 
+`
+  "app-e2e": {
+      "root": "apps\\app-e2e",
+      "sourceRoot": "apps/app-e2e/src",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/app-e2e/cypress.json",
+            "tsConfig": "apps/app-e2e/tsconfig.e2e.json",
+            "devServerTarget": "app:serve",
+            "watch": true
+          },
+          [...]
+`
+
+when i add in options  `headless:true`  like : 
+
+`  "e2e": {
+          "builder": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/app-e2e/cypress.json",
+            "tsConfig": "apps/app-e2e/tsconfig.e2e.json",
+            "devServerTarget": "app:serve",
+            "headless": true
+          },`
 
 
+I get the following error message : 
+`
+Starting type checking service...
+Using 1 worker with 2048MB memory limit
 
 
-## ☁ Nx Cloud
+  1) An uncaught error was detected outside of a test
 
-### Computation Memoization in the Cloud
+  0 passing (584ms)
+  1 failing
 
-<p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
+  1) An uncaught error was detected outside of a test:
+     Error: The following error originated from your test code, not from Cypress.
 
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
+  > Fetching resource at '/__cypress/tests?p=src\support\index.ts' failed
 
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
+When Cypress detects uncaught errors originating from your test code it will automatically fail t
+he current test.
 
-Visit [Nx Cloud](https://nx.app/) to learn more.
+Cypress could not associate this error to any specific test.
+
+We dynamically generated a new test to display this failure.
+      at XMLHttpRequest.xhr.onerror (http://localhost:4200/__cypress/runner/cypress_runner.js:174
+630:14)
+
+`
